@@ -1,7 +1,6 @@
 def hex2bin(s: str):
-   """ 
-   Hexadecimal to binary conversion 
-   """
+   "Hexadecimal to binary conversion."
+
    # return bin(int(s, 16)).replace('0b', '')
    mp = {
       '0': "0000",
@@ -28,9 +27,8 @@ def hex2bin(s: str):
 
 
 def bin2hex(s: str):
-   """
-   Binary to hexadecimal conversion
-   """
+   "Binary to hexadecimal conversion."
+
    # return hex(int(s, 2)).replace('0x', '')
 
    mp = {
@@ -63,13 +61,12 @@ def bin2hex(s: str):
    return hexx
 
 
-def bin2dec(binary: int):
-   """
-   Binary to decimal conversion
-   """
+def bin2dec(binary: str):
+   "Binary to decimal conversion."
 
-   binary1 = binary
-   decimal, i, n = 0, 0, 0
+   binary = int(binary)
+   
+   decimal, i = 0, 0
    while(binary != 0):
       dec = binary % 10
       decimal = decimal + dec * pow(2, i)
@@ -79,9 +76,7 @@ def bin2dec(binary: int):
 
 
 def dec2bin(num: int):
-   """
-   Decimal to binary conversion
-   """
+   "Decimal to binary conversion."
 
    res = bin(num).replace("0b", "")
    if(len(res) % 4 != 0):
@@ -91,3 +86,30 @@ def dec2bin(num: int):
       for i in range(0, counter):
          res = '0' + res
    return res
+
+
+def shift_left(bits: str, k: int):
+   "Shift the bits towards left circularly by k positions."
+
+   s = ""
+   for i in range(k):
+      for j in range(1, len(bits)):
+         s = s + bits[j]
+      s = s + bits[0]
+      bits = s
+      s = ""
+   return bits
+
+
+def xor(a: str, b: str):
+   "Calculate XOR bitwise operation between a and b."
+   
+   assert(len(a) == len(b))
+
+   ans = ""
+   for i in range(len(a)):
+      if a[i] == b[i]:
+         ans = ans + "0"
+      else:
+         ans = ans + "1"
+   return ans
