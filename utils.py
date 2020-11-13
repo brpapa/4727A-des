@@ -1,3 +1,5 @@
+from typing import List
+
 def hex2bin(s: str):
    "Hexadecimal to binary conversion."
 
@@ -113,3 +115,11 @@ def xor(a: str, b: str):
       else:
          ans = ans + "1"
    return ans
+
+def permute(bits: str, table: List[int], bits_size: int):
+   "Permute bits."
+
+   permutation = ""
+   for i in range(bits_size):
+      permutation += bits[table[i] - 1]
+   return permutation

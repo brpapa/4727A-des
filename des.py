@@ -1,23 +1,13 @@
 """
    Data Encryption Standard (DES) algorithm.
 """
-from typing import List
 from utils import *
 from constants import *
-
-def permute(bits: str, table: List[int], bits_size: int):
-   "Permute bits."
-
-   permutation = ""
-   for i in range(bits_size):
-      permutation += bits[table[i] - 1]
-   return permutation
 
 def f(right: str, subkey: str):
    assert(len(right) == 32 and len(subkey) == 48)
 
    # expand from 32 bits to 48 bits
-   # the 32-bit right is divided into 8 4-bit groups, and each 4-bit group is expanded to a 6-bit group
    right_expanded = permute(right, expansion_table, 48)
 
    # xor between the 48-bit right and the 48-bit subkey of current round
@@ -30,7 +20,7 @@ def f(right: str, subkey: str):
       group = right[i*6 : i*6+6]         # i-th group of 6 bits
       row = bin2dec(group[0] + group[5]) # row ranges 0 to 3 (00 to 11)
       col = bin2dec(group[1:5])          # col ranges 0 to 15 (0000 to 1111)
-      val = sbox_tables[i][row][col]     # ranges 0 to 15
+      val = sbox_tables[i][row][col]     # val ranges 0 to 15
       sbox = sbox + dec2bin(val)
 
    # permuting the bits
@@ -44,7 +34,6 @@ def encrypt(plain_text: str, subkeys: str):
    # initial permutation
    plain_text = permute(plain_text, initial_permutation_table, 64)
 
-   # splitting in half
    left = plain_text[0:32]
    right = plain_text[32:64]
 
@@ -61,42 +50,33 @@ def encrypt(plain_text: str, subkeys: str):
    cipher_text = permute(left + right, final_permutation_table, 64)
    return cipher_text
 
-def all_subkeys(key: str):
+def generate_all_subkeys(key: str):
    "Compute all 16 48-bit subkeys, given a 64-bit key."
+   assert(len(key) == 64)
 
    # getting 56-bit key from 64-bit original key using the parity bits
-   # discarting the bits 8, 16, 24, 32, 40, 48, 56, 64 (1-based index)
    key = permute(key, parity_bit_drop_table, 56)
 
-   # number of bit shifts, for each round
-   shift_table = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
-
-   # splitting in half
    left = key[0:28]
    right = key[28:56]
 
    subkeys = []
    for round in range(16):
-      # shifting the bits of previous left and right
       left = shift_left(left, shift_table[round])
       right = shift_left(right, shift_table[round])
 
       # compression of key from 56 bits to 48 bits
-      # discarting the bits 9, 18, 22, 25, 35, 38, 43, 54 (1-based index)
-      round_key = permute(left + right, key_transformation_table, 48)
+      subkey = permute(left + right, key_transformation_table, 48)
 
-      subkeys.append(round_key)
+      subkeys.append(subkey)
 
    return subkeys
 
 if __name__ == "__main__":
-   plain_text = "0123456789ABCDEF" # 64-bit plain text
-   key = "133457799BBCDFF1"        # 64-bit key, but will be transformed into a 56-bit key
+   plain_text = hex2bin("0123456789ABCDEF") # 64-bit plain text
+   key = hex2bin("133457799BBCDFF1")        # 64-bit key, but will be transformed into a 56-bit key
 
-   plain_text = hex2bin(plain_text)
-   key = hex2bin(key)
-
-   subkeys = all_subkeys(key)
+   subkeys = generate_all_subkeys(key)
 
    print("Encrypting...")
    print("Input (plain text):", bin2hex(plain_text))
@@ -107,4 +87,3 @@ if __name__ == "__main__":
    print("Input (cipher text):", bin2hex(cipher_text))
    plain_text = encrypt(cipher_text, subkeys[::-1])
    print("Output (plain text):", bin2hex(plain_text))
-
